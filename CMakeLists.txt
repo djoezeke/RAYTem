@@ -17,6 +17,12 @@ project(RAYTem
 )
 
 #--------------------------------------------------------------------
+# Include FetchContent module
+#--------------------------------------------------------------------
+
+include(FetchContent)
+
+#--------------------------------------------------------------------
 # Preparations depending on the specified build options  
 #--------------------------------------------------------------------
 
@@ -84,11 +90,26 @@ if(NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 endif()
 
 #--------------------------------------------------------------------
-# Add Subdirectories
+# Fetch dependencies
 #--------------------------------------------------------------------
 
-# Build vendor libraries
-add_subdirectory(vendor)
+# Fetch Raylib
+FetchContent_Declare(
+  raylib
+  GIT_REPOSITORY https://github.com/raysan5/raylib.git
+  GIT_TAG 5.0
+)
+
+# Set Raylib options
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(raylib)
+
+#--------------------------------------------------------------------
+# Add Subdirectories
+#--------------------------------------------------------------------
 
 # Build the documentation   
 if(RAYTEM_ENABLE_DOXYGEN)
@@ -113,13 +134,11 @@ endif()
 # Build targets
 #--------------------------------------------------------------------
 
-include_directories("." "./include" "vendor/imgui" "vendor/raylib/src")
-
 set(RAYTEM_SOURCE_FILES "src/main.cpp")
 
 # Add executable
 add_executable("${RAYTEM_EXE_TARGET_NAME}" ${RAYTEM_SOURCE_FILES})
-target_link_libraries("${RAYTEM_EXE_TARGET_NAME}" PRIVATE raylib_static imgui rlimgui)
+target_link_libraries("${RAYTEM_EXE_TARGET_NAME}" PRIVATE raylib)
 
 if(RAYTEM_PRODUCTION_BUILD)
 	# setup the ASSETS_PATH macro to be in the root folder of your exe
